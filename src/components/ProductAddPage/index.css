@@ -1,0 +1,82 @@
+.product-form-container {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+form div {
+  margin-bottom: 15px;
+}
+
+input,
+textarea,
+select {
+  width: 100%;
+  padding: 10px;
+  margin-top: 5px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+}
+
+textarea {
+  height: 100px;
+}
+
+button {
+  padding: 10px 20px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #218838;
+}
+
+.logout-button {
+  padding: 10px 20px;
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 20px;
+}
+
+.logout-button:hover {
+  background-color: #c82333;
+}
+
+.message {
+  text-align: center;
+  margin: 10px 0;
+}
+
+.image-previews {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: row; /* Align images in a horizontal row */
+  gap: 10px;
+  overflow-x: auto; /* Allow horizontal scrolling if there are too many images */
+  max-height: 100vh; /* Limit the height to 100vh */
+}
+
+.preview-container img {
+  height: 100%; /* Ensure the image fits the container height */
+  width: auto; /* Maintain aspect ratio */
+  max-width: 200px; /* Limit the width of each image */
+  object-fit: cover; /* Ensure image scaling doesn't distort */
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
