@@ -87,7 +87,7 @@ const ProductForm = () => {
         name: "",
         description: "",
         price: "",
-        category: "Mobile & Accessories",
+        category: "Safety & Security",
         stock: "",
         discount: 0,
       });
@@ -158,7 +158,7 @@ const ProductForm = () => {
             onChange={handleChange}
             required
           >
-            <option value="Mobile & Accessories">Safety & Security</option>
+            <option value="Safety & Security">Safety & Security</option>
             <option value="Computers & Laptops">Computers & Laptops</option>
             <option value="TV & Entertainment">TV & Entertainment</option>
             <option value="Cameras & Photography">Cameras & Photography</option>
