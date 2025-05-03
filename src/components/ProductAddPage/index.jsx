@@ -1,63 +1,60 @@
 import React, { useState } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
-import "./index.css"; // Import the CSS file
+import { useNavigate } from "react-router-dom";
+import "./index.css";
+
+const DEFAULT_CATEGORY = "Mobile & Accessories";
 
 const ProductForm = () => {
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     name: "",
     description: "",
     price: "",
-    category: "Mobile & Accessories",
+    category: DEFAULT_CATEGORY,
     stock: "",
     discount: 0,
   });
 
   const [images, setImages] = useState([]);
-  const [imagePreviews, setImagePreviews] = useState([]); // State to store preview URLs
+  const [imagePreviews, setImagePreviews] = useState([]);
   const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    setFormData({
-      ...formData,
-      [name]:
-        name === "price" || name === "stock" || name === "discount"
-          ? Number(value)
-          : value,
-    });
+    setFormData((prev) => ({
+      ...prev,
+      [name]: ["price", "stock", "discount"].includes(name)
+        ? Number(value)
+        : value,
+    }));
   };
 
   const handleImageChange = (e) => {
     const selectedFiles = Array.from(e.target.files);
     setImages(selectedFiles);
 
-    // Generate image preview URLs
     const previewUrls = selectedFiles.map((file) => URL.createObjectURL(file));
     setImagePreviews(previewUrls);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     setMessage("");
 
-    if (
-      !formData.name ||
-      !formData.description ||
-      !formData.price ||
-      !formData.category ||
-      !formData.stock
-    ) {
-      setMessage("Please fill in all required fields.");
+    const { name, description, price, category, stock } = formData;
+    if (!name || !description || !price || !category || !stock) {
+      setMessage("❌ Please fill in all required fields.");
       return;
     }
 
     const formDataToSend = new FormData();
-
-    Object.keys(formData).forEach((key) => {
-      formDataToSend.append(key, formData[key]);
+    Object.entries(formData).forEach(([key, value]) => {
+      formDataToSend.append(key, value);
     });
 
     images.forEach((image) => {
@@ -67,11 +64,13 @@ const ProductForm = () => {
     try {
       const token = Cookies.get("jwtToken");
       if (!token) {
-        setMessage("JWT token not found. Please log in again.");
+        setMessage("❌ JWT token not found. Please log in again.");
         return;
       }
 
-      const res = await axios.post(
+      setLoading(true);
+
+      await axios.post(
         "https://magictreebackend.onrender.com/products/create",
         formDataToSend,
         {
@@ -83,32 +82,37 @@ const ProductForm = () => {
       );
 
       setMessage("✅ Product created successfully!");
+
+      // Reset form state
       setFormData({
         name: "",
         description: "",
         price: "",
-        category: "Safety & Security",
+        category: DEFAULT_CATEGORY,
         stock: "",
         discount: 0,
       });
       setImages([]);
-      setImagePreviews([]); // Reset image previews
+      setImagePreviews([]);
     } catch (err) {
       console.error(err);
       setMessage(
         err?.response?.data?.message || "❌ Failed to create product."
       );
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleLogout = () => {
-    Cookies.remove("jwtToken"); // Remove the JWT token
-    navigate("/"); // Redirect to the login page
+    Cookies.remove("jwtToken");
+    navigate("/");
   };
 
   return (
     <div className="product-form-container">
       <h1>Create New Product</h1>
+
       {message && (
         <p
           className="message"
@@ -117,6 +121,7 @@ const ProductForm = () => {
           {message}
         </p>
       )}
+
       <form onSubmit={handleSubmit} encType="multipart/form-data">
         <div>
           <label>Product Name:</label>
@@ -158,6 +163,7 @@ const ProductForm = () => {
             onChange={handleChange}
             required
           >
+            <option value="Mobile & Accessories">Mobile & Accessories</option>
             <option value="Safety & Security">Safety & Security</option>
             <option value="Computers & Laptops">Computers & Laptops</option>
             <option value="TV & Entertainment">TV & Entertainment</option>
@@ -216,7 +222,9 @@ const ProductForm = () => {
           </div>
         )}
 
-        <button type="submit">Create Product</button>
+        <button type="submit" disabled={loading}>
+          {loading ? "Creating..." : "Create Product"}
+        </button>
       </form>
 
       <button className="logout-button" onClick={handleLogout}>
