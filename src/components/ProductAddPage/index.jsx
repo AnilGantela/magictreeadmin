@@ -103,7 +103,7 @@ const ProductForm = () => {
 
   const handleLogout = () => {
     Cookies.remove("jwtToken"); // Remove the JWT token
-    window.location.href = "/login"; // Redirect to login page
+    navigate("/"); // Redirect to the login page
   };
 
   return (
