@@ -4,7 +4,27 @@ import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
 import "./index.css";
 
-const DEFAULT_CATEGORY = "Mobile & Accessories";
+const DEFAULT_CATEGORY = "Industrial";
+
+const categoryMap = {
+  Industrial: [],
+  "Security & Safety": ["Biometrics", "CCTV Surveillance"],
+  "Eco Friendly": ["Bags", "Chappals", "Clothes"],
+  "HR Consultancy": [
+    "Internships/Summer Projects",
+    "Man Power Planning",
+    "Training",
+    "Appraisal Systems",
+    "Recruitment/Placements",
+  ],
+  Marketing: [
+    "Market Research",
+    "Product Selling/Buying",
+    "Advertising",
+    "Product Design",
+    "Product Pricing",
+  ],
+};
 
 const ProductForm = () => {
   const navigate = useNavigate();
@@ -14,6 +34,7 @@ const ProductForm = () => {
     description: "",
     price: "",
     category: DEFAULT_CATEGORY,
+    subcategory: "",
     stock: "",
     discount: 0,
   });
@@ -26,12 +47,20 @@ const ProductForm = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    setFormData((prev) => ({
-      ...prev,
-      [name]: ["price", "stock", "discount"].includes(name)
-        ? Number(value)
-        : value,
-    }));
+    if (name === "category") {
+      setFormData((prev) => ({
+        ...prev,
+        category: value,
+        subcategory: "", // reset subcategory when category changes
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: ["price", "stock", "discount"].includes(name)
+          ? Number(value)
+          : value,
+      }));
+    }
   };
 
   const handleImageChange = (e) => {
@@ -46,9 +75,15 @@ const ProductForm = () => {
     e.preventDefault();
     setMessage("");
 
-    const { name, description, price, category, stock } = formData;
+    const { name, description, price, category, subcategory, stock } = formData;
+
     if (!name || !description || !price || !category || !stock) {
       setMessage("❌ Please fill in all required fields.");
+      return;
+    }
+
+    if (categoryMap[category].length > 0 && !subcategory) {
+      setMessage("❌ Please select a subcategory.");
       return;
     }
 
@@ -83,12 +118,12 @@ const ProductForm = () => {
 
       setMessage("✅ Product created successfully!");
 
-      // Reset form state
       setFormData({
         name: "",
         description: "",
         price: "",
         category: DEFAULT_CATEGORY,
+        subcategory: "",
         stock: "",
         discount: 0,
       });
@@ -163,20 +198,32 @@ const ProductForm = () => {
             onChange={handleChange}
             required
           >
-            <option value="Mobile & Accessories">Mobile & Accessories</option>
-            <option value="Safety & Security">Safety & Security</option>
-            <option value="Computers & Laptops">Computers & Laptops</option>
-            <option value="TV & Entertainment">TV & Entertainment</option>
-            <option value="Cameras & Photography">Cameras & Photography</option>
-            <option value="Home Appliances">Home Appliances</option>
-            <option value="Gaming & Accessories">Gaming & Accessories</option>
-            <option value="Networking & Accessories">
-              Networking & Accessories
-            </option>
-            <option value="Wearable Technology">Wearable Technology</option>
-            <option value="Car Electronics">Car Electronics</option>
+            {Object.keys(categoryMap).map((cat) => (
+              <option key={cat} value={cat}>
+                {cat}
+              </option>
+            ))}
           </select>
         </div>
+
+        {categoryMap[formData.category].length > 0 && (
+          <div>
+            <label>Subcategory:</label>
+            <select
+              name="subcategory"
+              value={formData.subcategory}
+              onChange={handleChange}
+              required
+            >
+              <option value="">-- Select --</option>
+              {categoryMap[formData.category].map((sub) => (
+                <option key={sub} value={sub}>
+                  {sub}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
         <div>
           <label>Stock:</label>
