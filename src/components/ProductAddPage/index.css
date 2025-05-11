@@ -73,7 +73,7 @@ button:hover {
 }
 
 .preview-container img {
-  height: 100%; /* Ensure the image fits the container height */
+  height: 200px; /* Ensure the image fits the container height */
   width: auto; /* Maintain aspect ratio */
   max-width: 200px; /* Limit the width of each image */
   object-fit: cover; /* Ensure image scaling doesn't distort */
