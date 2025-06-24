@@ -37,6 +37,7 @@ const ProductForm = () => {
     subcategory: "",
     stock: "",
     discount: 0,
+    pGst: 18, // ➕ Add default GST
   });
 
   const [images, setImages] = useState([]);
@@ -56,7 +57,7 @@ const ProductForm = () => {
     } else {
       setFormData((prev) => ({
         ...prev,
-        [name]: ["price", "stock", "discount"].includes(name)
+        [name]: ["price", "stock", "discount", "pGst"].includes(name)
           ? Number(value)
           : value,
       }));
@@ -75,9 +76,10 @@ const ProductForm = () => {
     e.preventDefault();
     setMessage("");
 
-    const { name, description, price, category, subcategory, stock } = formData;
+    const { name, description, price, category, subcategory, stock, pGst } =
+      formData;
 
-    if (!name || !description || !price || !category || !stock) {
+    if (!name || !description || !price || !category || !stock || !pGst) {
       setMessage("❌ Please fill in all required fields.");
       return;
     }
@@ -126,6 +128,7 @@ const ProductForm = () => {
         subcategory: "",
         stock: "",
         discount: 0,
+        pGst: 18,
       });
       setImages([]);
       setImagePreviews([]);
@@ -186,6 +189,19 @@ const ProductForm = () => {
             name="price"
             value={formData.price}
             onChange={handleChange}
+            required
+          />
+        </div>
+
+        <div>
+          <label>Product GST (%):</label>
+          <input
+            type="number"
+            name="pGst"
+            value={formData.pGst}
+            onChange={handleChange}
+            min="0"
+            max="28"
             required
           />
         </div>
