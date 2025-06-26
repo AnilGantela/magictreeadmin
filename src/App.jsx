@@ -1,27 +1,72 @@
 import React from "react";
-import { Routes, Route, Navigate } from "react-router-dom"; // Correct import for Routes and Navigate
-import AdminLogin from "./components/AdminLoginPage"; // Login page component
-import ProtectedRoute from "./components/ProtectedRoute"; // Custom ProtectedRoute component
-import ProductForm from "./components/ProductAddPage"; // Product form component
-import Home from "./components/Home"; // Home component (if needed)
+import { Routes, Route, Navigate } from "react-router-dom";
+import AdminLogin from "./components/AdminLoginPage";
+import ProtectedRoute from "./components/ProtectedRoute";
+import ProductForm from "./components/ProductAddPage";
+import Home from "./components/Home";
+import Products from "./components/Products";
+import Orders from "./components/Orders";
+import AdminLayout from "./components/AdminLayout";
 
 const App = () => {
   return (
-    <>
-      <Routes>
-        {/* Login route */}
-        <Route path="/login" element={<AdminLogin />} />
-        {/* Home route */}
-        <Route path="/" element={<ProtectedRoute component={Home} />} />
-        <Route
-          path="/add-product"
-          element={<ProtectedRoute component={ProductForm} />} // Use your custom ProtectedRoute here
-        />
-        {/* Redirect to login if no route matches */}
-        <Route path="*" element={<Navigate to="/login" />} />
-        {/* Wildcard route for unmatched paths */}
-      </Routes>
-    </>
+    <Routes>
+      {/* No Navbar here */}
+      <Route path="/login" element={<AdminLogin />} />
+
+      {/* All protected routes go inside AdminLayout which includes Navbar */}
+      <Route
+        path="/"
+        element={
+          <ProtectedRoute
+            component={() => (
+              <AdminLayout>
+                <Home />
+              </AdminLayout>
+            )}
+          />
+        }
+      />
+      <Route
+        path="/add-product"
+        element={
+          <ProtectedRoute
+            component={() => (
+              <AdminLayout>
+                <ProductForm />
+              </AdminLayout>
+            )}
+          />
+        }
+      />
+      <Route
+        path="/products"
+        element={
+          <ProtectedRoute
+            component={() => (
+              <AdminLayout>
+                <Products />
+              </AdminLayout>
+            )}
+          />
+        }
+      />
+      <Route
+        path="/orders"
+        element={
+          <ProtectedRoute
+            component={() => (
+              <AdminLayout>
+                <Orders />
+              </AdminLayout>
+            )}
+          />
+        }
+      />
+
+      {/* Fallback route */}
+      <Route path="*" element={<Navigate to="/login" />} />
+    </Routes>
   );
 };
 

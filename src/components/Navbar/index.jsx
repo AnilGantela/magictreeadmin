@@ -6,13 +6,13 @@ const Navbar = () => {
       <Logo>MagicTree Admin</Logo>
       <NavLinks>
         <li>
-          <SLink to="/dashboard">Dashboard</SLink>
+          <SLink to="/">Dashboard</SLink>
         </li>
         <li>
-          <SLink to="/users">Users</SLink>
+          <SLink to="/orders">Orders</SLink>
         </li>
         <li>
-          <SLink to="/settings">Settings</SLink>
+          <SLink to="/products">Products</SLink>
         </li>
 
         <li>

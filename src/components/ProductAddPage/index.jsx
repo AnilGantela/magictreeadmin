@@ -99,7 +99,7 @@ const ProductForm = () => {
     });
 
     try {
-      const token = Cookies.get("jwtToken");
+      const token = Cookies.get("adminToken");
       if (!token) {
         setMessage("❌ JWT token not found. Please log in again.");
         return;
@@ -143,7 +143,7 @@ const ProductForm = () => {
   };
 
   const handleLogout = () => {
-    Cookies.remove("jwtToken");
+    Cookies.remove("adminToken");
     navigate("/");
   };
 

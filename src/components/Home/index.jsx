@@ -1,67 +1,216 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import Cookies from "js-cookie";
 import Navbar from "../Navbar";
+import {
+  Container,
+  Title,
+  StatCardContainer,
+  StatCard,
+  ChartContainer,
+  ErrorText,
+  LoadingText,
+} from "./styledComponents";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  CartesianGrid,
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
+} from "recharts";
+
+const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#AF19FF"];
 
 const Home = () => {
+  const [stats, setStats] = useState([]);
+  const [paymentStats, setPaymentStats] = useState([]);
+  const [orderStatusStats, setOrderStatusStats] = useState([]);
+  const [dailyRevenue, setDailyRevenue] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [orders, setOrders] = useState([]);
+  const [totalDay, setTotalDay] = useState(0);
+  const [totalMonth, setTotalMonth] = useState(0);
+  const [totalYear, setTotalYear] = useState(0);
 
   useEffect(() => {
-    const fetchOrders = async () => {
+    const fetchAllStats = async () => {
       try {
-        const token = localStorage.getItem("adminToken"); // or Cookies.get("adminToken")
-        const response = await axios.get(
-          "https://magictreebackend.onrender.com/order/all", // Update this URL if needed
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
+        const token = Cookies.get("adminToken");
+        const year = new Date().getFullYear();
+
+        const [monthlyRes, paymentRes, statusRes, dailyRes] = await Promise.all(
+          [
+            axios.post(
+              "https://magictreebackend.onrender.com/admin/orders/monthly-stats",
+              { year },
+              { headers: { Authorization: `Bearer ${token}` } }
+            ),
+            axios.get(
+              "https://magictreebackend.onrender.com/admin/analytics/revenue/payment-method",
+              { headers: { Authorization: `Bearer ${token}` } }
+            ),
+            axios.get(
+              "https://magictreebackend.onrender.com/admin/analytics/orders/status",
+              { headers: { Authorization: `Bearer ${token}` } }
+            ),
+            axios.get(
+              "https://magictreebackend.onrender.com/admin/analytics/revenue/daily",
+              { headers: { Authorization: `Bearer ${token}` } }
+            ),
+          ]
         );
-        setOrders(response.data);
+
+        const monthlyData = monthlyRes.data.data || [];
+        setStats(monthlyData);
+        setPaymentStats(paymentRes.data.data || []);
+        setOrderStatusStats(statusRes.data.data || []);
+        setDailyRevenue(dailyRes.data.data || []);
+
+        const now = new Date();
+        let monthRevenue = 0;
+        let yearRevenue = 0;
+
+        for (let i = 0; i < monthlyData.length; i++) {
+          const entryDate = new Date(monthlyData[i].month);
+          if (entryDate.getFullYear() === now.getFullYear()) {
+            yearRevenue += Number(monthlyData[i].totalRevenue);
+            if (entryDate.getMonth() === now.getMonth()) {
+              monthRevenue += Number(monthlyData[i].totalRevenue);
+            }
+          }
+        }
+
+        const todayEntry = dailyRes.data.data.find(
+          (entry) =>
+            new Date(entry.date).toDateString() === new Date().toDateString()
+        );
+
+        setTotalYear(yearRevenue.toFixed(2));
+        setTotalMonth(monthRevenue.toFixed(2));
+        setTotalDay(
+          todayEntry ? Number(todayEntry.totalRevenue).toFixed(2) : "0.00"
+        );
       } catch (err) {
-        setError("Failed to fetch orders.");
         console.error(err);
+        setError("Failed to fetch stats.");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchOrders();
+    fetchAllStats();
   }, []);
 
   return (
-    <div style={{ padding: "2rem" }}>
-      <Navbar />
-      <h1>Welcome to the Admin Home Page</h1>
-      <p>
-        This is the main dashboard. Use the navigation to access different
-        sections of the admin panel.
-      </p>
+    <Container>
+      <Title>📊 Admin Dashboard</Title>
 
-      {loading && <p>Loading orders...</p>}
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      {loading && <LoadingText>Loading stats...</LoadingText>}
+      {error && <ErrorText>{error}</ErrorText>}
+
       {!loading && !error && (
         <>
-          <h3>Recent Orders</h3>
-          {orders.length === 0 ? (
-            <p>No orders found.</p>
-          ) : (
-            <ul>
-              {orders.slice(0, 5).map((order) => (
-                <li key={order._id}>
-                  <strong>Order ID:</strong> {order._id} &nbsp; | &nbsp;
-                  <strong>Status:</strong> {order.status} &nbsp; | &nbsp;
-                  <strong>Total:</strong> ₹
-                  {(order.totalAmount / 100).toFixed(2)}
-                </li>
-              ))}
-            </ul>
-          )}
+          <StatCardContainer>
+            <StatCard>
+              <h3>Today</h3>
+              <p>₹ {totalDay}</p>
+            </StatCard>
+            <StatCard>
+              <h3>This Month</h3>
+              <p>₹ {totalMonth}</p>
+            </StatCard>
+            <StatCard>
+              <h3>This Year</h3>
+              <p>₹ {totalYear}</p>
+            </StatCard>
+          </StatCardContainer>
+
+          <ChartContainer>
+            <h2>📈 Monthly Revenue</h2>
+            <ResponsiveContainer width="100%" height={350}>
+              <BarChart data={stats}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="month" />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="totalRevenue" fill="#8884d8" />
+              </BarChart>
+            </ResponsiveContainer>
+          </ChartContainer>
+
+          <ChartContainer>
+            <h2>📊 Order Status Distribution</h2>
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={orderStatusStats}
+                  dataKey="count"
+                  nameKey="status"
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={100}
+                  label
+                >
+                  {orderStatusStats.map((entry, index) => (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={COLORS[index % COLORS.length]}
+                    />
+                  ))}
+                </Pie>
+                <Tooltip />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          </ChartContainer>
+
+          <ChartContainer>
+            <h2>💳 Revenue by Payment Method</h2>
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={paymentStats}
+                  dataKey="totalRevenue"
+                  nameKey="method"
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={100}
+                  label
+                >
+                  {paymentStats.map((entry, index) => (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={COLORS[index % COLORS.length]}
+                    />
+                  ))}
+                </Pie>
+                <Tooltip />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          </ChartContainer>
+
+          <ChartContainer>
+            <h2>📅 Daily Revenue (Current Month)</h2>
+            <ResponsiveContainer width="100%" height={350}>
+              <BarChart data={dailyRevenue}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="date" />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="totalRevenue" fill="#82ca9d" />
+              </BarChart>
+            </ResponsiveContainer>
+          </ChartContainer>
         </>
       )}
-    </div>
+    </Container>
   );
 };
 

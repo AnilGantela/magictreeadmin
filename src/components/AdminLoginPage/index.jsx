@@ -10,7 +10,7 @@ const AdminLogin = () => {
 
   useEffect(() => {
     // Check if the JWT token is already present in cookies
-    const token = Cookies.get("jwtToken");
+    const token = Cookies.get("adminToken");
     if (token) {
       // If token is found, redirect to the home page
       navigate("/"); // Redirect to home page
@@ -36,7 +36,7 @@ const AdminLogin = () => {
 
       if (response.data.token) {
         // Store JWT token in cookies
-        Cookies.set("jwtToken", response.data.token, { expires: 1 }); // Expires in 1 day
+        Cookies.set("adminToken", response.data.token, { expires: 1 }); // Expires in 1 day
         navigate("/"); // Redirect to home page after login
         console.log("Login successful!"); // Log success message
       }
