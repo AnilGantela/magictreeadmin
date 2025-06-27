@@ -67,9 +67,13 @@ const Home = () => {
         );
 
         const monthlyData = monthlyRes.data.data || [];
+        console.log("Monthly Data:", monthlyData);
+
         setStats(monthlyData);
         setPaymentStats(paymentRes.data.data || []);
         setOrderStatusStats(statusRes.data.data || []);
+        console.log("Payment Stats:", paymentRes.data.data);
+        console.log("Order Status Stats:", statusRes.data.data);
         setDailyRevenue(dailyRes.data.data || []);
 
         const now = new Date();

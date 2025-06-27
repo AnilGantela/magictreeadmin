@@ -37,7 +37,7 @@ const ProductForm = () => {
     subcategory: "",
     stock: "",
     discount: 0,
-    pGst: 18, // ➕ Add default GST
+    pGst: 18,
   });
 
   const [images, setImages] = useState([]);
@@ -52,7 +52,7 @@ const ProductForm = () => {
       setFormData((prev) => ({
         ...prev,
         category: value,
-        subcategory: "", // reset subcategory when category changes
+        subcategory: "", // reset subcategory
       }));
     } else {
       setFormData((prev) => ({
@@ -222,24 +222,22 @@ const ProductForm = () => {
           </select>
         </div>
 
-        {categoryMap[formData.category].length > 0 && (
-          <div>
-            <label>Subcategory:</label>
-            <select
-              name="subcategory"
-              value={formData.subcategory}
-              onChange={handleChange}
-              required
-            >
-              <option value="">-- Select --</option>
-              {categoryMap[formData.category].map((sub) => (
-                <option key={sub} value={sub}>
-                  {sub}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
+        <div>
+          <label>Subcategory:</label>
+          <select
+            name="subcategory"
+            value={formData.subcategory}
+            onChange={handleChange}
+            disabled={categoryMap[formData.category].length === 0}
+          >
+            <option value="">-- Select --</option>
+            {categoryMap[formData.category].map((sub) => (
+              <option key={sub} value={sub}>
+                {sub}
+              </option>
+            ))}
+          </select>
+        </div>
 
         <div>
           <label>Stock:</label>
